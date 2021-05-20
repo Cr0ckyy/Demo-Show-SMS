@@ -1,10 +1,5 @@
 package com.myapplicationdev.android.c347_l5_ex2demoshowsms;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.PermissionChecker;
-
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
@@ -12,10 +7,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.PermissionChecker;
 
 public class MainActivity extends AppCompatActivity {
     TextView tvSms;
@@ -25,46 +24,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // todo:  Binding UI variables
         tvSms = findViewById(R.id.tv);
         btnRetrieve = findViewById(R.id.btnRetrieve);
 
+        // todo: 9.	To include the runtime check in the app
+        int permissionCheck = PermissionChecker.checkSelfPermission(MainActivity.this, Manifest.permission.READ_SMS);
+
+        if (permissionCheck != PermissionChecker.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.READ_SMS}, 0);
+            // stops the action from proceeding further as permission not
+            //  granted yet
+            return;
+        }
+
         btnRetrieve.setOnClickListener(view -> {
 
-            // todo: 9.	To include the runtime check in the app
-            int permissionCheck = PermissionChecker.checkSelfPermission
-                    (MainActivity.this, Manifest.permission.READ_SMS);
+            // TODO: Retrieve an SMS message from the built-in content provider
+            // Get Content Resolver object from which to
+            //  query the content provider
+            ContentResolver contentResolver = getContentResolver();
 
-            if (permissionCheck != PermissionChecker.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.READ_SMS}, 0);
-                // stops the action from proceeding further as permission not
-                //  granted yet
-                return;
-            }
-
-            // Create all messages URI
+            // TODO:  Create all messages URI
             Uri uri = Uri.parse("content://sms");
 
             // The columns we want
-            //  date is when the message took place
-            //  address is the number of the other party
-            //  body is the message content
-            //  type 1 is received, type 2 sent
+            // TODO:  date is when the message took place
+            // TODO: address is the number of the other party
+            // TODO:  body is the message content
+            // TODO: type 1 is received, type 2 sent
             String[] reqCols = new String[]{"date", "address", "body", "type"};
 
-            // Get Content Resolver object from which to
-            //  query the content provider
-            ContentResolver cr = getContentResolver();
-
-
+            // SQLite Operator that functions like a conditional statement
             String filter = "body LIKE ? AND body LIKE ? AND body LIKE ?";
-            String[] filterArgs = {"%late%", "%minute%"};
+            String[] filterArgs = {"%Hello%", "%5556%"};
 
 
-            Cursor cursor = cr.query(uri, reqCols, filter, filterArgs, null);
-            String smsBody = "Marty McFly: Wait a minute. Wait a minute. Doc... Are you telling me that it's 8:25? " + "\n" +
-                    "Dr. Emmett Brown: Precisely. " + "\n" +
-                    "Marty McFly: Damn! I'm late for school!";
+            Cursor cursor = contentResolver.query(uri, reqCols, filter, filterArgs, null);
+            String smsBody = "";
 
             if (cursor.moveToFirst()) {
                 do {
@@ -104,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case 0: {
+
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
